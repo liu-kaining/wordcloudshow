@@ -112,9 +112,6 @@ wordcloud-generator/
 自然语言处理（NLP）是人工智能领域的重要分支，近年来随着深度学习的发展，Transformer架构在机器翻译、文本生成等任务中取得了显著进展。BERT、GPT等模型已经成为现代NLP系统的基石。
 ```
 
-### **生成词云**
-![示例词云](https://via.placeholder.com/800x400.png?text=示例词云)
-
 ---
 
 ## **贡献指南**
