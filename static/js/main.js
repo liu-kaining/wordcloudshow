@@ -88,7 +88,7 @@ class WordCloudGenerator {
     }
 
     /**
-     * 创建画布
+     * 创建高清画布
      */
     createCanvas() {
         const container = document.getElementById('wordCloudContainer');
@@ -98,6 +98,7 @@ class WordCloudGenerator {
         const { width, height } = this.getDimensions();
         const dpr = window.devicePixelRatio || 1;
 
+        // 高清画布设置
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         canvas.style.width = `${width}px`;
@@ -112,7 +113,7 @@ class WordCloudGenerator {
      */
     async generate() {
         try {
-            // 新增确认弹窗
+            // 确认弹窗
             if (!window.confirm('确定要生成新的词云吗？当前词云将被替换。')) {
                 return;
             }
@@ -157,15 +158,18 @@ class WordCloudGenerator {
                 this.cloudInstance = WordCloud(canvas, {
                     list: wordList,
                     backgroundColor: '#ffffff',
-                    weightFactor: size => size,
+                    weightFactor: size => size * (window.devicePixelRatio || 1), // 根据DPI调整权重
                     color: () => `hsl(${Math.random() * 360}, 70%, 50%)`,
                     rotateRatio: 0.35,
                     rotationSteps: 3,
-                    gridSize: 12,
+                    gridSize: Math.round(8 * (window.devicePixelRatio || 1)), // 根据DPI调整网格大小
                     minSize: 14,
                     wait: 100,
                     abortThreshold: 10000,
-                    hover: window.devicePixelRatio > 1 ? null : undefined
+                    hover: window.devicePixelRatio > 1 ? null : undefined,
+                    shrinkToFit: true, // 确保词云适应画布
+                    drawOutOfBound: false, // 禁止绘制到画布外
+                    origin: [canvas.width / 2, canvas.height / 2] // 居中渲染
                 });
                 resolve();
             } catch (error) {
@@ -178,7 +182,7 @@ class WordCloudGenerator {
      * 下载词云图片
      */
     download() {
-        // 新增确认弹窗
+        // 确认弹窗
         if (!window.confirm('确定要下载当前词云图片吗？')) {
             return;
         }
@@ -187,10 +191,25 @@ class WordCloudGenerator {
 
         try {
             const canvas = document.querySelector('#wordCloudContainer canvas');
+            const dpr = window.devicePixelRatio || 1;
+
+            // 创建高清画布
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const ctx = tempCanvas.getContext('2d');
+
+            // 填充白色背景
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            // 绘制词云
+            ctx.drawImage(canvas, 0, 0);
+
+            // 下载图片
             const link = document.createElement('a');
             link.download = `wordcloud_${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png');
-
+            link.href = tempCanvas.toDataURL('image/png', 1.0); // 最高质量
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
